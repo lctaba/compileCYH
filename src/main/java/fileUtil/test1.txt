@@ -1,0 +1,91 @@
+词法分析文法：
+G[S] = (Vn,Vt,P,S)
+Vn = {S,<token>,<id>,<keyword>,<integer>,<float>,<cstring>,<op>,<bound>,<char>,<letter>,<digit>}
+Vt = {任意可输入的字符}
+P:
+S           →       <token>+
+<token>     →       <id>|<keyword>|<integer>|<float>|<op>|<bound>|<cstring>
+<id>        →       <letter>(<letter>|<digit>)*
+<keyword>   →       for|while|do|break|continue|if|else|return|
+                    void|true|false|int|double|string|bool
+<integer>   →       <letter>+
+<float>     →       <letter>+.<letter>*
+<cstring>   →       "<char>*"
+<op>        →       + | - | * | / | % | & | \| | ！ | < | > | >= | <= | != | =
+<bound>     →       (|)|{|}|;|,
+<char>      →       Vt - {"}
+                    注：<char>为字符，表示除"以外的所有非终结符号
+<letter>    →       a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|
+                    A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z
+<digit>     →       0|1|2|3|4|5|6|7|8|9
+
+
+
+语法分析文法：
+G[S] = {Vn,Vt,P,<program>}
+Vn = {<program>,<statement>,<declareStatement>,<assignStatement>,<ifStatement>,<elseStatement>,
+        <whileStatement>,<ariExpression>,<logicExpression>,<type>,<comparator>}
+Vt = {<id>,<constInt>,<constDouble>,while,if,else,true,false,int,double,bool,+,-,*,/,&,|,!,<,>,>=,<=,!=,==,=,(|){|}|;|#|Ɛ}
+P:
+<program>           →       <statement><program>|Ɛ
+<statement>         →       <declareStatement>|<assignStatement>|<ifStatement>|<whileStatement>|Ɛ
+<declareStatement>  →       <type><id>;|<type><assignStatement>
+<assignStatement>   →       <id>=<ariExpression>;|<id><=<logicExpression>;
+<ifStatement>       →       if(<logicExpression>){<program>}<elseStatement>
+<elseStatement>     →       else{<program>}|Ɛ
+<whileStatement>    →       while(<logicExpression>){<program>}
+<ariExpression>     →       +T|-T|T|<ariExpression>+T|<ariExpression>-T
+T                   →       F|T*F|T/F
+F                   →       <id>|<constInt>|<constDouble>|(<ariExpression>)
+<logicExpression>   →       {<ariExpression><comparator><ariExpression>}| <logicExpression>&<logicExpression>|
+                            <logicExpression>|<logicExpression>|!<logicExpression>|(<logicExpression>)|
+                            true|false|<id>
+<type>              →       int|double|bool
+<comparator>        →       <|>|>=|<=|!=|==
+
+
+
+
+消除左递归：
+<program>           →       <statement><program>|Ɛ
+<statement>         →       <declareStatement>|<assignStatement>|<ifStatement>|<whileStatement>|Ɛ
+<declareStatement>  →       <type><id>;|<type><assignStatement>
+<assignStatement>   →       <id>=<ariExpression>;|<id><=<logicExpression>;
+<ifStatement>       →       if(<logicExpression>){<program>}<elseStatement>
+<elseStatement>     →       else{<program>}|Ɛ
+<whileStatement>    →       while(<logicExpression>){<program>}
+<ariExpression>     →       +T<ariExpression>'|-T<ariExpression>'|T<ariExpression>'
+<ariExpression>'    →       +T<ariExpression>'|-T<ariExpression>'|Ɛ
+T                   →       FT'
+T'                  →       *FT'|/FT'|Ɛ
+F                   →       <id>|<constInt>|<constDouble>|(<ariExpression>)
+<logicExpression>   →       {<ariExpression><comparator><ariExpression>}<logicExpression>'|
+                            !<logicExpression><logicExpression>'|(<logicExpression>)<logicExpression>'|
+                            true<logicExpression>'|false<logicExpression>'|<id><logicExpression>'
+<logicExpression>'  →       &<logicExpression><logicExpression>'| |<logicExpression><logicExpression>'|Ɛ
+<type>              →       int|double|bool
+<comparator>        →       <|>|>=|<=|!=|==
+
+
+提取左公因子
+<program>           →       <statement><program>|Ɛ
+<statement>         →       <declareStatement>|<assignStatement>|<ifStatement>|<whileStatement>|Ɛ
+<declareStatement>  →       <type>A
+A                   →       <id>C
+C                   →       ;|=<ariExpression>;|<=<logicExpression>;
+<assignStatement>   →       <id>B
+B                   →       =<ariExpression>;|<=<logicExpression>;
+<ifStatement>       →       if(<logicExpression>){<program>}<elseStatement>
+<elseStatement>     →       else{<program>}|Ɛ
+<whileStatement>    →       while(<logicExpression>){<program>}
+<ariExpression>     →       +T<ariExpression>'|-T<ariExpression>'|T<ariExpression>'
+<ariExpression>'    →       +T<ariExpression>'|-T<ariExpression>'|Ɛ
+T                   →       FT'
+T'                  →       *FT'|/FT'|Ɛ
+F                   →       <id>|<constInt>|<constDouble>|(<ariExpression>)
+<logicExpression>   →       {<ariExpression><comparator><ariExpression>}<logicExpression>'|
+                            !<logicExpression><logicExpression>'|(<logicExpression>)<logicExpression>'|
+                            true<logicExpression>'|false<logicExpression>'|<id><logicExpression>'
+<logicExpression>'  →       &<logicExpression><logicExpression>'| |<logicExpression><logicExpression>'|Ɛ
+<type>              →       int|double|bool
+<comparator>        →       <|>|>=|<=|!=|==
